@@ -128,6 +128,7 @@ between triggering events. It only has effect if `autoupdate` is set to `true`.
 * **trigger** (write-only) - writing anything other than 0 to this file will
 cause a triggering event if `autoupdate` is set to `false` or if sufficient time
 has passed since the previous reading.
+* **timestamp** (read-only) - show the timestamp of the last valid value
 
 Note that writing to files in _/sys/kernel/_ is forbidden for group 'other',
 therefore any writes should be performed with root permissions. This is enforced
