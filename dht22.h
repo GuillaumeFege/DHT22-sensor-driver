@@ -77,6 +77,9 @@ static ssize_t
 humidity_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf);
 
 static ssize_t
+timestamp_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf);
+
+static ssize_t
 trigger_store(struct kobject *kobj,
 		struct kobj_attribute *attr,
 		const char *buf,

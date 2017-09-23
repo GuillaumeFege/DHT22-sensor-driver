@@ -26,6 +26,8 @@ static int sensor_data[DATA_SIZE];
 
 static int raw_temperature = 0;
 static int raw_humidity = 0;
+static int raw_timestamp = 0;
+static struct timespec64 timestamp_started;
 static int retry_count = 0;
 static bool retry = false;
 
@@ -54,6 +56,7 @@ static struct kobj_attribute autoupdate_timeout_attr =
 	__ATTR_RW(autoupdate_timeout_ms);
 static struct kobj_attribute temperature_attr = __ATTR_RO(temperature);
 static struct kobj_attribute humidity_attr = __ATTR_RO(humidity);
+static struct kobj_attribute timestamp_attr = __ATTR_RO(timestamp);
 static struct kobj_attribute trigger_attr = __ATTR_WO(trigger);
 
 static struct attribute *dht22_attrs[] = {
@@ -62,6 +65,7 @@ static struct attribute *dht22_attrs[] = {
 	&autoupdate_timeout_attr.attr,
 	&temperature_attr.attr,
 	&humidity_attr.attr,
+	&timestamp_attr.attr,
 	&trigger_attr.attr,
 	NULL,
 };
@@ -242,6 +246,7 @@ static void trigger_sensor(struct work_struct *work)
 	mdelay(TRIGGER_SIGNAL_LEN);
 
 	gpio_direction_input(gpio);
+	getnstimeofday64(&timestamp_started);
 	udelay(TRIGGER_POST_DELAY);
 
 	if (!autoupdate && !hrtimer_active(&retry_timer)) {
@@ -394,6 +399,7 @@ static void process_results(struct work_struct *work)
 
 	raw_humidity = humidity;
 	raw_temperature = temperature;
+	raw_timestamp = timestamp_started.tv_sec;
 
 	pr_info("Temperature: %d.%d C; Humidity: %d.%d%%\n",
 		temperature / 10,
@@ -470,6 +476,12 @@ humidity_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 	return sprintf(buf, "%d.%d%%\n",
 		raw_humidity / 10,
 		raw_humidity % 10);
+}
+
+static ssize_t
+timestamp_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n",raw_timestamp);
 }
 
 static ssize_t
